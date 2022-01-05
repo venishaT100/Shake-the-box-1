@@ -19,10 +19,10 @@ var render = Render.create({
 element: document.body,
 engine: engine,
 options: {
-    width: 1500,
-    height: 600,
+    width: 800,
+    height: 660,
     wireframes: false,
-    background: "black",   //B5EAEA
+    background: 'bg2.jpg',   
 }
 });
 
@@ -32,14 +32,15 @@ Render.run(render);
 var runner = Runner.create();
 Runner.run(runner, engine);
 
-var wallStyle = { fillStyle: '#00FFB6' };
-var bodyStyle = { sprite:{texture:'smile.png',xScale:0.17,yScale:0.17} };
+var wallStyle = { fillStyle: '#83FF00' };
+var bodyStyle = { sprite:{texture:'smile.jpg',xScale:0.10,yScale:0.10} };
+
 
 var wall1 = Bodies.rectangle(400, 0, 800, 50, { isStatic: true, render: wallStyle }),
-    wall2 = Bodies.rectangle(400, 600, 800, 50, { isStatic: true, render: wallStyle }),
+    wall2 = Bodies.rectangle(400, 650, 800, 50, { isStatic: true, render: wallStyle }),
     wall3 = Bodies.rectangle(800, 0, 50, 230, { isStatic: true, render: wallStyle }),
     wall4 = Bodies.rectangle(800, 450, 50, 350, { isStatic: true, render: wallStyle }),
-    wall5 = Bodies.rectangle(0, 300, 50, 600, { isStatic: true, render: wallStyle });
+    wall5 = Bodies.rectangle(0, 400, 50, 750, { isStatic: true, render: wallStyle });
 
 Composite.add(world, [wall1, wall2, wall3, wall4, wall5]);
 
@@ -57,7 +58,8 @@ Events.on(engine, 'collisionStart', function(event) {
     for (var i = 0; i < pairs.length; i++) {
         var pair = pairs[i];
         pair.bodyA.render.fillStyle = '#9300FF';
-        pair.bodyB.render.sprite.texture = 'blind-face.png';
+        pair.bodyB.render.sprite.texture = 'blind-face2.jpg'
+
     }
 });
 
@@ -67,10 +69,42 @@ Events.on(engine, 'collisionActive', function(event) {
     for (var i = 0; i < pairs.length; i++) {
         var pair = pairs[i];
         pair.bodyA.render.fillStyle = '#00FFB6';
-        pair.bodyB.render.sprite.texture = 'smile.png';
+        pair.bodyB.render.sprite.texture = 'smile.jpg';
     }
 });
 
+Events.on(engine, 'collisionEnd', function(event) {
+    var pairs = event.pairs;
+    
+    for (var i = 0; i < pairs.length; i++) {
+        var pair = pairs[i];
+        pair.bodyA.render.fillStyle = '#FF0074';
+        pair.bodyB.render.fillStyle = '#00FFFF';
+    }
+});
+
+Events.on(engine, 'beforeUpdate', function(event) {
+    var pairs = event.source;
+    
+    if (event.timestamp % 5000 < 50) {
+       shakeScene(engine);
+    }
+});
+
+var shakeScene = function(engine) {
+    var bodies = Composite.allBodies(engine.world);
+    for (var i = 0; i < bodies.length; i++) {
+        var body = bodies[i];
+        if (!body.isStatic && body.position.y >= 500) {
+            var forceMagnitude=(0.02 * body.mass)*Common.random();
+
+            Body.applyForce(body, body.position, {
+                x: forceMagnitude*Common.choose([1,-1]),
+                y:-forceMagnitude
+            });
+        }
+    }
+};
 
 var mouse = Mouse.create(render.canvas),
 mouseConstraint = MouseConstraint.create(engine, {
